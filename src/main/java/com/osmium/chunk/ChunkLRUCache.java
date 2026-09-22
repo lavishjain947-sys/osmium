@@ -36,9 +36,11 @@ public final class ChunkLRUCache {
     public static synchronized void put(long chunkKey, WorldChunk chunk) {
         if (chunk == null) return;
         lruMap.put(chunkKey, chunk);
-        Long oldHandle = offHeapHandles.remove(chunkKey);
-        if (oldHandle != null) {
-            OffHeapCache.free(oldHandle);
+        for (int s = 0; s < 32; s++) {
+            Long oldHandle = offHeapHandles.remove(chunkKey * 32 + s);
+            if (oldHandle != null) {
+                OffHeapCache.free(oldHandle);
+            }
         }
     }
 
@@ -48,9 +50,11 @@ public final class ChunkLRUCache {
 
     public static synchronized void remove(long chunkKey) {
         lruMap.remove(chunkKey);
-        Long handle = offHeapHandles.remove(chunkKey);
-        if (handle != null) {
-            OffHeapCache.free(handle);
+        for (int s = 0; s < 32; s++) {
+            Long handle = offHeapHandles.remove(chunkKey * 32 + s);
+            if (handle != null) {
+                OffHeapCache.free(handle);
+            }
         }
     }
 
@@ -70,35 +74,50 @@ public final class ChunkLRUCache {
 
     private static void onEvict(long key, WorldChunk chunk) {
         try {
-            // Extract real block data from the chunk's sections.
-            // In 1.21.11, each ChunkSection is a 16x16x16 block volume.
-            // We compress the first section's palette data as a proof-of-concept.
-            // A full implementation would compress all sections.
             ChunkSection[] sections = chunk.getSectionArray();
-            if (sections.length == 0) return;
+            if (sections == null || sections.length == 0) return;
 
-            // Flatten the first section into a short[4096] for compression.
-            // Uses the section's block state container.
-            short[] sectionData = new short[4096];
-            int idx = 0;
-            for (int y = 0; y < 16; y++) {
-                for (int z = 0; z < 16; z++) {
-                    for (int x = 0; x < 16; x++) {
-                        var state = sections[0].getBlockState(x, y, z);
-                        sectionData[idx++] = (short) Block.getRawIdFromState(state);
+            for (int s = 0; s < sections.length; s++) {
+                if (sections[s] == null) continue;
+                short[] sectionData = new short[4096];
+                int idx = 0;
+                for (int y = 0; y < 16; y++) {
+                    for (int z = 0; z < 16; z++) {
+                        for (int x = 0; x < 16; x++) {
+                            var state = sections[s].getBlockState(x, y, z);
+                            sectionData[idx++] = (short) Block.getRawIdFromState(state);
+                        }
                     }
                 }
-            }
 
-            byte[] compressed = ChunkDataCompressor.compress(sectionData);
-            long handle = OffHeapCache.store(compressed);
-            if (handle != -1) {
-                offHeapHandles.put(key, handle);
+                byte[] compressed = ChunkDataCompressor.compress(sectionData);
+                long handle = OffHeapCache.store(compressed);
+                if (handle != -1) {
+                    offHeapHandles.put(key * 32 + s, handle);
+                }
             }
         } catch (Throwable t) {
             // Never let cache eviction crash the game.
             OsmiumConstants.LOGGER.debug("Osmium: onEvict failed for chunk {}", key, t);
         }
+    }
+
+    public static short[] loadSection(long chunkKey, int sectionIndex) {
+        Long handle = offHeapHandles.get(chunkKey * 32 + sectionIndex);
+        if (handle == null) return null;
+        byte[] compressed = OffHeapCache.load(handle);
+        if (compressed == null) return null;
+        return ChunkDataCompressor.decompress(compressed);
+    }
+
+    public static short[][] loadAllSections(long chunkKey) {
+        short[][] sections = new short[32][];
+        boolean any = false;
+        for (int s = 0; s < 32; s++) {
+            sections[s] = loadSection(chunkKey, s);
+            if (sections[s] != null) any = true;
+        }
+        return any ? sections : null;
     }
 
     public static synchronized int size() {
