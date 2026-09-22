@@ -1,0 +1,20 @@
+accessWidener v2 named
+
+# Accessible Box coordinates if needed
+accessible class net/minecraft/util/math/Box
+accessible field net/minecraft/util/math/Box minX D
+accessible field net/minecraft/util/math/Box minY D
+accessible field net/minecraft/util/math/Box minZ D
+accessible field net/minecraft/util/math/Box maxX D
+accessible field net/minecraft/util/math/Box maxY D
+accessible field net/minecraft/util/math/Box maxZ D
+
+# Accessible BlockPos and BlockPos$Mutable
+accessible class net/minecraft/util/math/BlockPos
+accessible class net/minecraft/util/math/BlockPos$Mutable
+accessible method net/minecraft/util/math/BlockPos$Mutable set (III)Lnet/minecraft/util/math/BlockPos$Mutable;
+
+# Accessible Viewport / Framebuffer details
+accessible class net/minecraft/client/gl/Framebuffer
+accessible field net/minecraft/client/gl/Framebuffer viewportWidth I
+accessible field net/minecraft/client/gl/Framebuffer viewportHeight I
