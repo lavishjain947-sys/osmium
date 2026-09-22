@@ -23,5 +23,12 @@ public class IrisPipelineMixin {
     @Inject(method = "beginLevelRendering", at = @At("HEAD"), require = 0, cancellable = true)
     private void osmium$onBeginLevelRendering(CallbackInfo ci) {
         ShaderAwareCuller.captureGbufferDepth();
+        net.minecraft.client.MinecraftClient client = net.minecraft.client.MinecraftClient.getInstance();
+        if (client != null && client.getWindow() != null) {
+            com.osmium.render.CheckerboardRenderer.beginFrame(
+                    client.getWindow().getFramebufferWidth(),
+                    client.getWindow().getFramebufferHeight()
+            );
+        }
     }
 }

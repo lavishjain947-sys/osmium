@@ -42,6 +42,7 @@ public class OsmiumClient implements ClientModInitializer {
                 com.osmium.render.HierarchicalZCuller.destroy();
                 com.osmium.render.TemporalUpscaler.destroyHistoryBuffer();
                 com.osmium.render.VariableRateShading.destroy();
+                com.osmium.render.CheckerboardRenderer.destroy();
                 com.osmium.core.OffHeapCache.shutdown();
                 com.osmium.core.MemoryOrchestrator.shutdown();
             } catch (Throwable t) {
