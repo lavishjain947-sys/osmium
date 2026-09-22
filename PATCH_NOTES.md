@@ -1,5 +1,26 @@
 # Osmium — Patch Notes
 
+## v1.0.5 Patch Notes
+
+### Block Entity Culling & Mixin Hardening
+1. **`src/main/java/com/osmium/mixin/client/BlockEntityRenderDispatcherMixin.java`**:
+   - Replaced projection-only matrix with combined `viewProj` matrix (`RenderSystem.getProjectionMatrix() * RenderSystem.getModelViewMatrix()`).
+   - Expanded culling box to `new Box(pos).expand(1.0)` to eliminate clipping on multi-block/large block entities (chests, signs, banners, beds, shulkers).
+   - Removed generic `<E>` signature in favor of concrete `BlockEntity`.
+   - Promoted `@Inject` to `require = 1`.
+2. **`src/main/java/com/osmium/mixin/client/WorldRendererMixin.java`**:
+   - Promoted `renderEntities` injection to `require = 1`.
+   - Maintained `renderBlockEntities` at `require = 0` as a placeholder for Iris G-buffer depth capture in v1.1.
+3. **`src/main/java/com/osmium/mixin/client/GameRendererMixin.java`**:
+   - Removed unused dead field `osmium$lastStateValid`.
+4. **`gradle.properties`**:
+   - Tuned heap to `-Xmx768M` and metaspace to `256M` to avoid OOM on 4GB host systems.
+   - Set `daemon=false`, `parallel=false`, and `configureondemand=true`.
+5. **`src/main/java/com/osmium/OsmiumClient.java`**:
+   - Removed redundant `ShaderAwareCuller.init()` invocation and unused import.
+
+---
+
 ## v1.0.4 Patch Notes
 
 ### Mixin Hardening & Resource Cleanup

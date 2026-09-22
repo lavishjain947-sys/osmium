@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.5 — Block Entity Culling Fix
+
+### Fixed
+- **BlockEntityRenderDispatcherMixin**: Rewrote mixin using full view-projection matrix (`RenderSystem.getProjectionMatrix() * RenderSystem.getModelViewMatrix()`), expanded bounding box (`new Box(pos).expand(1.0)` to properly encompass chests, signs, banners, beds, and shulker boxes), concrete `BlockEntity` parameter type, and promoted `require = 1`.
+- **WorldRendererMixin**: Promoted `renderEntities` injection to `require = 1`. Kept `renderBlockEntities` as `require = 0` no-op reserved for v1.1.
+- **GameRendererMixin**: Removed dead field `osmium$lastStateValid`.
+- **Low-RAM Tuning**: Tuned `gradle.properties` JVM args to `-Xmx768M -XX:MaxMetaspaceSize=256M -XX:+UseG1GC -XX:G1NewSizePercent=40 -XX:MaxGCPauseMillis=50` with daemon/parallel disabled and configure-on-demand enabled for 4GB RAM systems.
+- **OsmiumClient**: Removed unused `ShaderAwareCuller.init()` call and import.
+
 ## 1.0.4 — Mixin Hardening & GPU Cleanup
 
 ### Fixed

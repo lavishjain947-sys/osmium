@@ -16,8 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
 
-    private static boolean osmium$lastStateValid = true;
-
     @Inject(method = "renderWorld", at = @At("HEAD"), require = 1)
     private void osmium$beforeWorldRender(RenderTickCounter tickCounter,
             CallbackInfo ci) {

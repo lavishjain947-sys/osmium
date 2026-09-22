@@ -11,17 +11,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(WorldRenderer.class)
 public class WorldRendererMixin {
-    @Inject(method = "renderEntities", at = @At("HEAD"), require = 0)
+
+    @Inject(method = "renderEntities", at = @At("HEAD"), require = 1)
     private void osmium$onRenderEntitiesHead(CallbackInfo ci) {
-        if (OsmiumConfig.get().hierarchicalZCullingEnabled) {
+        OsmiumConfig cfg = OsmiumConfig.get();
+        if (cfg != null && cfg.hierarchicalZCullingEnabled) {
             HierarchicalZCuller.captureDepthMirror();
         }
     }
 
     @Inject(method = "renderBlockEntities", at = @At("HEAD"), require = 0)
     private void osmium$onRenderBlockEntitiesHead(CallbackInfo ci) {
-        if (ShaderAwareCuller.isIrisLoaded) {
-            ShaderAwareCuller.captureGbufferDepth();
-        }
+        // Reserved for Iris G-buffer integration in v1.1.
+        // No-op in v1.0.5.
     }
 }
+
