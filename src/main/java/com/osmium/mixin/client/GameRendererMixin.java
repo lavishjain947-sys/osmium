@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.osmium.render.TemporalUpscaler;
+import com.osmium.render.VariableRateShading;
 import org.joml.Matrix4f;
 
 @Mixin(GameRenderer.class)
@@ -29,13 +30,17 @@ public class GameRendererMixin {
             DynamicResolutionController.tick(cfg);
         }
 
+        Window window = MinecraftClient.getInstance().getWindow();
+        if (window != null) {
+            VariableRateShading.beginFrame(window.getFramebufferWidth(), window.getFramebufferHeight());
+        }
+
         Matrix4f viewProj = new Matrix4f(RenderSystem.getProjectionMatrix());
         viewProj.mul(RenderSystem.getModelViewMatrix());
         TemporalUpscaler.updateMatrices(viewProj);
 
         float scale = DynamicResolutionController.getScale();
         if (scale < 0.999f) {
-            Window window = MinecraftClient.getInstance().getWindow();
             if (window != null) {
                 int w = Math.max(1, (int) (window.getFramebufferWidth() * scale));
                 int h = Math.max(1, (int) (window.getFramebufferHeight() * scale));
@@ -47,6 +52,8 @@ public class GameRendererMixin {
     @Inject(method = "renderWorld", at = @At("RETURN"), require = 1)
     private void osmium$afterWorldRender(RenderTickCounter tickCounter,
             CallbackInfo ci) {
+        VariableRateShading.endFrame();
+
         Window window = MinecraftClient.getInstance().getWindow();
         if (window != null) {
             RenderSystem.viewport(0, 0,
