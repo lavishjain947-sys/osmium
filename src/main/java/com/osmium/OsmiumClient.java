@@ -39,6 +39,7 @@ public class OsmiumClient implements ClientModInitializer {
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             try {
                 com.osmium.render.HierarchicalZCuller.destroy();
+                com.osmium.render.TemporalUpscaler.destroyHistoryBuffer();
                 com.osmium.core.OffHeapCache.shutdown();
                 com.osmium.core.MemoryOrchestrator.shutdown();
             } catch (Throwable t) {

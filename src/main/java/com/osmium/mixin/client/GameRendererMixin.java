@@ -13,6 +13,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.osmium.render.TemporalUpscaler;
+import org.joml.Matrix4f;
+
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
 
@@ -25,6 +28,10 @@ public class GameRendererMixin {
         if (cfg.dynamicResolutionEnabled) {
             DynamicResolutionController.tick(cfg);
         }
+
+        Matrix4f viewProj = new Matrix4f(RenderSystem.getProjectionMatrix());
+        viewProj.mul(RenderSystem.getModelViewMatrix());
+        TemporalUpscaler.updateMatrices(viewProj);
 
         float scale = DynamicResolutionController.getScale();
         if (scale < 0.999f) {
@@ -44,6 +51,15 @@ public class GameRendererMixin {
         if (window != null) {
             RenderSystem.viewport(0, 0,
                     window.getFramebufferWidth(), window.getFramebufferHeight());
+            float scale = DynamicResolutionController.getScale();
+            if (scale < 0.999f && MinecraftClient.getInstance().getFramebuffer() != null) {
+                int w = Math.max(1, (int) (window.getFramebufferWidth() * scale));
+                int h = Math.max(1, (int) (window.getFramebufferHeight() * scale));
+                DynamicResolutionController.upscaleIfNeeded(
+                        MinecraftClient.getInstance().getFramebuffer().fbo,
+                        w, h, window.getFramebufferWidth(), window.getFramebufferHeight()
+                );
+            }
         }
     }
 }

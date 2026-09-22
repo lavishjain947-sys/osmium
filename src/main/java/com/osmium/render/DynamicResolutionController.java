@@ -76,4 +76,10 @@ public final class DynamicResolutionController {
     public static void setPrevTextureId(int id) {
         prevTextureId = id;
     }
+
+    public static void upscaleIfNeeded(int srcFbo, int srcW, int srcH, int dstW, int dstH) {
+        if (currentScale < 0.999f) {
+            TemporalUpscaler.upscale(srcFbo, srcW, srcH, dstW, dstH);
+        }
+    }
 }

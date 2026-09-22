@@ -28,6 +28,13 @@ public class OsmiumConfig {
     public boolean debugStats = false;
     public float temporalBlendWeight = 0.15f;
 
+    // v1.1 Extreme Performance Flags
+    public boolean vrsEnabled = false;
+    public boolean checkerboardEnabled = false;
+    public boolean svdagEnabled = true;
+    public boolean softwareRenderingEnabled = false;
+    public boolean temporalUpscalingEnabled = true;
+
     /** Static singleton accessor used across the mod. */
     public static OsmiumConfig get() {
         OsmiumConfig local = INSTANCE;
