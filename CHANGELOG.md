@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.0 — Extreme Performance Features
+
+### Added
+- **TECH A (Variable Rate Shading)**: Implemented `VariableRateShading` with foveated shading rate images (center 1x1, mid-ring 1x2, periphery 2x2/4x4) via `GL_NV_shading_rate_image` to slash fragment shader load.
+- **TECH B (Checkerboard Rendering)**: Implemented `CheckerboardRenderer` to render expensive screen-space effects (SSAO, SSR, volumetric fog) at half resolution with alternating parity and temporal reconstruction.
+- **TECH C (SVDAG Chunk Storage)**: Implemented `SvdagNode`, `SvdagBuilder`, and `SvdagStorage` compressing homogeneous voxel octants to ~0.08 bits/voxel with full DAG deduplication and off-heap storage.
+- **TECH D (Tile-Based CPU Rasterizer)**: Added `TileBuffer` and `SoftwareRasterizer` for extreme GPU-less rendering using early-Z rejection and axis-aligned quad rasterization.
+- **TECH E (Temporal Upscaling - TAAU)**: Implemented `TemporalUpscaler` reprojecting previous frame history with camera motion vectors and dynamic blend weights.
+- **TECH F (Iris G-Buffer Depth Culling)**: Re-enabled `IrisPipelineMixin` and updated `ShaderAwareCuller` to capture shader G-buffer depth for occlusion testing.
+- **TECH G (Full Chunk Section Compression)**: Extended `ChunkLRUCache.onEvict` and `loadSection` to compress and cache all 32 vertical chunk sections instead of just section 0.
+
 ## 1.0.5 — Block Entity Culling Fix
 
 ### Fixed

@@ -1,5 +1,18 @@
 # Osmium — Patch Notes
 
+## v1.1.0 Patch Notes
+
+### Extreme Performance Features (v1.1)
+1. **TECH G — Full Chunk Section Compression (`ChunkLRUCache.java`)**: Extended chunk eviction and off-heap caching across all 32 vertical sections.
+2. **TECH E — Temporal Upscaling (`TemporalUpscaler.java`)**: Added TAAU with motion vectors derived from view-projection delta, adaptive blending (0.15–0.50), and ghosting suppression.
+3. **TECH C — SVDAG Chunk Storage (`SvdagNode.java`, `SvdagBuilder.java`, `SvdagStorage.java`)**: Added Sparse Voxel Directed Acyclic Graph storage format with octree deduplication.
+4. **TECH F — Iris G-Buffer Culling (`IrisPipelineMixin.java`, `ShaderAwareCuller.java`)**: Re-enabled Iris pipeline hook to capture shader G-buffer depth directly.
+5. **TECH A — Variable Rate Shading (`VariableRateShading.java`)**: Added foveated shading rate image generation via `GL_NV_shading_rate_image`.
+6. **TECH B — Checkerboard Rendering (`CheckerboardRenderer.java`)**: Half-resolution checkerboard rendering for screen-space effects with temporal reconstruction.
+7. **TECH D — Tile-Based CPU Rasterizer (`SoftwareRasterizer.java`, `TileBuffer.java`)**: CPU software rasterizer prototype for GPU-less hardware.
+
+---
+
 ## v1.0.5 Patch Notes
 
 ### Block Entity Culling & Mixin Hardening
