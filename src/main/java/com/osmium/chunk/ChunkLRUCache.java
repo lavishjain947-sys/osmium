@@ -77,6 +77,9 @@ public final class ChunkLRUCache {
             ChunkSection[] sections = chunk.getSectionArray();
             if (sections == null || sections.length == 0) return;
 
+            OsmiumConfig cfg = OsmiumConfig.get();
+            boolean useSvdag = (cfg != null && cfg.svdagEnabled);
+
             for (int s = 0; s < sections.length; s++) {
                 if (sections[s] == null) continue;
                 short[] sectionData = new short[4096];
@@ -90,8 +93,11 @@ public final class ChunkLRUCache {
                     }
                 }
 
-                byte[] compressed = ChunkDataCompressor.compress(sectionData);
-                long handle = OffHeapCache.store(compressed);
+                long handle = useSvdag ? SvdagStorage.store(sectionData) : -1;
+                if (handle == -1) {
+                    byte[] compressed = ChunkDataCompressor.compress(sectionData);
+                    handle = OffHeapCache.store(compressed);
+                }
                 if (handle != -1) {
                     offHeapHandles.put(key * 32 + s, handle);
                 }
@@ -105,6 +111,13 @@ public final class ChunkLRUCache {
     public static short[] loadSection(long chunkKey, int sectionIndex) {
         Long handle = offHeapHandles.get(chunkKey * 32 + sectionIndex);
         if (handle == null) return null;
+
+        OsmiumConfig cfg = OsmiumConfig.get();
+        if (cfg != null && cfg.svdagEnabled) {
+            short[] svdagData = SvdagStorage.load(handle);
+            if (svdagData != null) return svdagData;
+        }
+
         byte[] compressed = OffHeapCache.load(handle);
         if (compressed == null) return null;
         return ChunkDataCompressor.decompress(compressed);
