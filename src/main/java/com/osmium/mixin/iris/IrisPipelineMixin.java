@@ -1,17 +1,14 @@
 package com.osmium.mixin.iris;
 
-import com.osmium.render.ShaderAwareCuller;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Placeholder for future Iris integration. Disabled in v1.0.1.
+ * Shader-aware culling is planned for v1.1 after Iris API verification.
+ */
 @Pseudo
-@Mixin(targets = "net.irisshaders.iris.pipeline.WorldRenderingPipeline", remap = false)
+@Mixin(targets = "net.irisshaders.iris.pipeline.WorldRenderingPipeline")
 public class IrisPipelineMixin {
-    @Inject(method = "render", at = @At("HEAD"), require = 0, remap = false)
-    private void osmium$onIrisRenderHead(CallbackInfo ci) {
-        ShaderAwareCuller.captureGbufferDepth();
-    }
+    // Intentionally empty.
 }

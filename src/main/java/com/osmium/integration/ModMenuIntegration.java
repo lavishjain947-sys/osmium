@@ -1,6 +1,7 @@
 package com.osmium.integration;
 
 import com.osmium.OsmiumConstants;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -9,8 +10,8 @@ import net.minecraft.text.Text;
 public final class ModMenuIntegration {
     private ModMenuIntegration() {}
 
-    public static void register() {
-        OsmiumConstants.LOGGER.info("[Osmium] ModMenu integration initialized.");
+    public static boolean isModLoaded() {
+        return FabricLoader.getInstance().isModLoaded("modmenu");
     }
 
     public static Screen createConfigScreen(Screen parent) {
@@ -43,7 +44,7 @@ public final class ModMenuIntegration {
         public void render(DrawContext context, int mouseX, int mouseY, float delta) {
             super.render(context, mouseX, mouseY, delta);
             context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 20, 0xFFFFFF);
-            context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("Osmium 1.0.0 - Client-Side Optimization"), this.width / 2, 50, 0xAAAAAA);
+            context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("Osmium 1.0.1 - Client-Side Optimization"), this.width / 2, 50, 0xAAAAAA);
             context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("Use /osmium in-game or edit config/osmium.json"), this.width / 2, 70, 0x888888);
         }
 

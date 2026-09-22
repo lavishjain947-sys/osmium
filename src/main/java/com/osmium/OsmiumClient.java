@@ -5,18 +5,15 @@ import com.osmium.core.FrameBudgetController;
 import com.osmium.core.MemoryOrchestrator;
 import com.osmium.core.OffHeapCache;
 import com.osmium.core.PredictionEngine;
-import com.osmium.integration.IrisIntegration;
-import com.osmium.integration.ModMenuIntegration;
 import com.osmium.integration.SodiumIntegration;
 import com.osmium.util.JvmTuner;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.loader.api.FabricLoader;
 
 public class OsmiumClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        OsmiumConfig config = OsmiumConfig.load();
+        OsmiumConfig config = OsmiumConfig.get();
 
         OsmiumConstants.LOGGER.info("==================================================");
         OsmiumConstants.LOGGER.info("{} v{} — Densest optimization. Zero stutter. Maximum FPS.",
@@ -32,10 +29,6 @@ public class OsmiumClient implements ClientModInitializer {
         JvmTuner.logRecommendations();
 
         SodiumIntegration.onInit();
-        IrisIntegration.onInit();
-
-        if (FabricLoader.getInstance().isModLoaded("modmenu")) {
-            ModMenuIntegration.register();
-        }
+        // Iris integration and ModMenu entrypoint are handled via dedicated entrypoints / inert stubs in v1.0.1
     }
 }

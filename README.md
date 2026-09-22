@@ -15,13 +15,13 @@ Osmium is a client-side Fabric optimization mod for Minecraft 1.21.11 engineered
 - **Allocation Reduction (Thread-Local Object Pools):** Bounded object pools for `BlockPos`, `AABB`, `Vec3d`, and `Vec3f` alongside enum `$VALUES` array caching, slashing allocation rate by up to 60%.
 - **Adaptive GC Orchestration:** Continuously samples `MemoryMXBean` and `GarbageCollectorMXBean` to proactively trim caches and shrink pools before GC pauses occur.
 - **Dynamic Resolution Scaling (DRS) + Temporal Reprojection:** Dynamically scales 3D render resolution between 50% and 100% based on frame budgets with TAAU temporal reprojection, recovering massive GPU headroom on integrated graphics.
-- **Hierarchical-Z Occlusion Culling:** Downsamples the depth buffer into a 64×64 depth mirror to cull hidden entities and block entities before draw calls.
-- **Shader-Aware Culling (Iris Integration):** Reuses the Iris G-buffer depth texture directly when shaders are active, delivering zero-overhead culling synchronization.
+- **Hierarchical-Z Occlusion Culling (Asynchronous PBO):** Downsamples the depth buffer into a 64×64 depth mirror using non-blocking Pixel Buffer Objects (PBO) and sync fences to cull hidden entities and block entities without CPU/GPU sync stalls.
+- **Shader-Aware Culling (Iris Integration):** Reuses the Iris G-buffer depth texture directly when shaders are active, delivering zero-overhead culling synchronization (inert placeholder in v1.0.1; full pipeline integration in v1.1).
 - **Predictive Chunk Loading:** Tracks player trajectory, velocity, and acceleration to prioritize loading chunks along the player's predicted movement vector.
 - **Frame Budgeting:** Maintains a 60-frame ring buffer to compute P50/P95/P99 latency, automatically throttling chunk compilation and rendering work when frame time spikes.
 - **Chunk Data Compression (Palette + RLE + Zstd):** Homogeneous chunk sections are compressed via a 3-stage pipeline, reducing chunk memory footprints by 60–90%.
-- **SIMD Acceleration (jdk.incubator.vector):** Vectorized math routines for batch vertex and coordinate transformations on supported hardware.
-- **Fast Math Lookup Tables:** 65,536-entry precomputed trigonometry tables and fast inverse square root bit tricks for particle and ambient rendering paths.
+- **SIMD Acceleration (jdk.incubator.vector):** Vectorized math routines for batch vertex and coordinate transformations on supported hardware (optimized scalar fallback in v1.0.1).
+- **Fast Math Lookup Tables:** 65,536-entry precomputed trigonometry tables with proper negative angle wrapping and fast inverse square root bit tricks for particle and ambient rendering paths.
 
 ---
 
@@ -29,15 +29,15 @@ Osmium is a client-side Fabric optimization mod for Minecraft 1.21.11 engineered
 
 1. Install **Fabric Loader** (`0.17.0` or higher) for Minecraft `1.21.11`.
 2. Install **Fabric API** (`0.115.0+1.21.11` or higher).
-3. Download `osmium-1.0.0.jar` from releases.
-4. Place `osmium-1.0.0.jar` into your Minecraft `.minecraft/mods/` directory.
+3. Download `osmium-1.0.0.jar` (or pre-built `osmium-fabric-1.21.11.zip`) from releases.
+4. Place the mod JAR into your Minecraft `.minecraft/mods/` directory.
 5. Launch Minecraft using Java 21+.
 
 ---
 
 ## Recommended JVM Arguments
 
-For optimal GC stability and minimal latency on 2GB–4GB systems:
+For optimal GC stability, minimal latency on 2GB–4GB systems, and full Java 21 module reflection access:
 
 ```text
 -Xms1536M -Xmx1536M
@@ -48,7 +48,11 @@ For optimal GC stability and minimal latency on 2GB–4GB systems:
 -XX:+AlwaysPreTouch
 -XX:+DisableExplicitGC
 -XX:+UseStringDeduplication
+--add-opens java.base/java.lang=ALL-UNNAMED
 ```
+
+> [!IMPORTANT]
+> The `--add-opens java.base/java.lang=ALL-UNNAMED` flag is recommended for `EnumValuesCache` on Java 21 to allow `MethodHandles.privateLookupIn` to access private static `$VALUES` fields across all core enum classes.
 
 ---
 
@@ -70,9 +74,9 @@ To enable SIMD vector acceleration using the Java 21 Vector API:
 | **Sodium** | ✔ | Fully compatible. Sodium optimizes GPU chunk rendering while Osmium minimizes CPU allocation and GC overhead. |
 | **Lithium** | ✔ | Fully compatible. Lithium focuses on server-side logic; Osmium is strictly client-side. |
 | **FerriteCore** | ✔ | Fully compatible. FerriteCore optimizes block state storage; Osmium provides off-heap chunk caching. |
-| **Iris** | ✔ | Fully compatible. Osmium captures Iris G-buffer depth directly for occlusion culling. |
+| **Iris** | ✔ | Fully compatible. Inert placeholder in v1.0.1; full G-buffer depth capture planned for v1.1. |
 | **EntityCulling** | ✔ | Fully compatible. Can run concurrently or deferred to Osmium's depth mirror culling. |
-| **ModMenu** | ✔ | Fully compatible. Provides a dedicated Osmium settings and diagnostic screen. |
+| **ModMenu** | ✔ | Fully compatible. Dedicated entrypoint provides Osmium settings and diagnostic screen without classloading issues. |
 | **Krypton** | ✔ | Fully compatible. Krypton optimizes network traffic; Osmium handles memory and rendering. |
 
 ---
@@ -89,7 +93,7 @@ To enable SIMD vector acceleration using the Java 21 Vector API:
 | `chunkLRUCacheSize` | int | `256` | Maximum number of chunks retained in on-heap LRU cache. |
 | `hierarchicalZCullingEnabled` | boolean | `true` | Enables 64×64 depth mirror occlusion culling. |
 | `shaderAwareCullingEnabled` | boolean | `true` | Enables integration with Iris shader depth pipelines. |
-| `objectPoolingEnabled` | boolean | `true` | Enables thread-safe object pooling for BlockPos, AABB, and Vec3. |
+| `objectPoolingEnabled` | boolean | `true` | Enables thread-safe object pooling for BlockPos, Box, and Vec3. |
 | `predictiveChunkLoadingEnabled` | boolean | `true` | Prioritizes chunk loading along player movement trajectory. |
 | `simdEnabled` | boolean | `false` | Enables Java Vector API acceleration (requires `--add-modules`). |
 | `debugStats` | boolean | `false` | Enables verbose diagnostic logging in console and HUD. |
@@ -108,25 +112,6 @@ All commands are client-side and do not require server permissions:
 - `/osmium reload`: Reloads configuration from `config/osmium.json`.
 - `/osmium pools`: Displays detailed statistics (hits, misses, current size) for all object pools.
 - `/osmium offheap`: Displays current off-heap cache metrics (used, capacity, free memory, entries, and evictions).
-
----
-
-## Benchmark Methodology
-
-Benchmarks were conducted on an Intel Core i3-10110U (2 cores, 4 threads, Intel UHD Graphics 620, 4GB DDR4 RAM allocated 1536MB heap):
-- **1% Low FPS:** Improved from 14 FPS to 46 FPS (stutter elimination).
-- **GC Pause Time:** Reduced total pause time by 82% over 30-minute test cycles.
-- **Heap Allocation Rate:** Dropped from ~350 MB/s to ~120 MB/s during rapid sprint flight.
-- **Off-Heap Utilization:** 180MB of active chunk data kept out of heap GC sweeps.
-
----
-
-## Roadmap
-
-- [ ] **SVDAG Storage:** Sparse Voxel Directed Acyclic Graph encoding for sub-chunk geometry.
-- [ ] **Software Tile Rasterizer:** Pure CPU tile-based occlusion culling for systems with high GPU fill-rate limits.
-- [ ] **Variable Rate Shading (VRS):** Peripheral rendering density reduction.
-- [ ] **Checkerboard Rendering:** Alternating half-resolution sampling patterns for ultra-low-power GPUs.
 
 ---
 

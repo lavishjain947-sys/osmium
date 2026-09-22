@@ -3,7 +3,6 @@ package com.osmium.util;
 public final class FastMath {
     private static final int TABLE_SIZE = 65536;
     private static final float TWO_PI = (float) (Math.PI * 2.0);
-    private static final float RAD_TO_INDEX = TABLE_SIZE / TWO_PI;
 
     public static final float[] SIN_TABLE = new float[TABLE_SIZE];
     public static final float[] COS_TABLE = new float[TABLE_SIZE];
@@ -18,14 +17,15 @@ public final class FastMath {
 
     private FastMath() {}
 
-    public static float sin(float rad) {
-        int index = (int) (rad * RAD_TO_INDEX) & (TABLE_SIZE - 1);
+    public static float sin(float radians) {
+        int index = (int) (radians * 10430.378f) & 0xFFFF;
         return SIN_TABLE[index];
     }
 
-    public static float cos(float rad) {
-        int index = (int) (rad * RAD_TO_INDEX) & (TABLE_SIZE - 1);
-        return COS_TABLE[index];
+    public static float cos(float radians) {
+        int index = (int) (radians * 10430.378f + 16384.0f) & 0xFFFF;
+        if (index < 0) index += 65536;
+        return SIN_TABLE[index];
     }
 
     public static double fastSqrt(double x) {

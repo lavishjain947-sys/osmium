@@ -16,6 +16,9 @@
   "entrypoints": {
     "client": [
       "com.osmium.OsmiumClient"
+    ],
+    "modmenu": [
+      "com.osmium.integration.ModMenuApiImpl"
     ]
   },
   "mixins": [

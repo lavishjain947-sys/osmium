@@ -12,7 +12,7 @@ import java.io.IOException;
 public class OsmiumConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final File CONFIG_FILE = FabricLoader.getInstance().getConfigDir().resolve("osmium.json").toFile();
-    private static OsmiumConfig INSTANCE = new OsmiumConfig();
+    private static volatile OsmiumConfig INSTANCE;
 
     public boolean enabled = true;
     public boolean dynamicResolutionEnabled = true;
@@ -28,28 +28,36 @@ public class OsmiumConfig {
     public boolean debugStats = false;
     public float temporalBlendWeight = 0.15f;
 
+    /** Static singleton accessor used across the mod. */
     public static OsmiumConfig get() {
-        if (INSTANCE == null) {
-            INSTANCE = load();
+        OsmiumConfig local = INSTANCE;
+        if (local == null) {
+            synchronized (OsmiumConfig.class) {
+                local = INSTANCE;
+                if (local == null) {
+                    local = load();
+                    INSTANCE = local;
+                }
+            }
         }
-        return INSTANCE;
+        return local;
     }
 
     public static OsmiumConfig load() {
+        OsmiumConfig loaded = null;
         if (CONFIG_FILE.exists()) {
             try (FileReader reader = new FileReader(CONFIG_FILE)) {
-                OsmiumConfig config = GSON.fromJson(reader, OsmiumConfig.class);
-                if (config != null) {
-                    INSTANCE = config;
-                    return config;
-                }
+                loaded = GSON.fromJson(reader, OsmiumConfig.class);
             } catch (IOException e) {
                 OsmiumConstants.LOGGER.error("[Osmium] Failed to read configuration file: {}", e.getMessage());
             }
         }
-        INSTANCE = new OsmiumConfig();
-        INSTANCE.save();
-        return INSTANCE;
+        if (loaded == null) {
+            loaded = new OsmiumConfig();
+            loaded.save();
+        }
+        INSTANCE = loaded;
+        return loaded;
     }
 
     public void save() {

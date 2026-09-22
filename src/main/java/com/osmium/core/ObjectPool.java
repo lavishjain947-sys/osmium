@@ -45,13 +45,16 @@ public final class ObjectPool<T> {
     }
 
     public void shrink(double factor) {
-        int targetSize = (int) (queue.size() * factor);
-        while (queue.size() > targetSize && !queue.isEmpty()) {
-            queue.poll();
+        if (factor <= 0.0 || factor >= 1.0) return;
+        int target = Math.max(0, (int) (maxSize * factor));
+        while (queue.size() > target) {
+            T item = queue.poll();
+            if (item == null) break;
         }
     }
 
     public static void shrinkAll(double factor) {
+        if (factor <= 0.0 || factor >= 1.0) return;
         for (ObjectPool<?> pool : ALL_POOLS) {
             pool.shrink(factor);
         }
