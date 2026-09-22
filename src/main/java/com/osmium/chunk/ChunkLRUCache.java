@@ -1,6 +1,9 @@
 package com.osmium.chunk;
 
+import com.osmium.OsmiumConstants;
 import com.osmium.core.OffHeapCache;
+import net.minecraft.block.Block;
+import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.Iterator;
@@ -66,12 +69,35 @@ public final class ChunkLRUCache {
     }
 
     private static void onEvict(long key, WorldChunk chunk) {
-        // Compress dummy/metadata section payload to off-heap cache
-        short[] sectionData = new short[4096];
-        byte[] compressed = ChunkDataCompressor.compress(sectionData);
-        long handle = OffHeapCache.store(compressed);
-        if (handle != -1) {
-            offHeapHandles.put(key, handle);
+        try {
+            // Extract real block data from the chunk's sections.
+            // In 1.21.11, each ChunkSection is a 16x16x16 block volume.
+            // We compress the first section's palette data as a proof-of-concept.
+            // A full implementation would compress all sections.
+            ChunkSection[] sections = chunk.getSectionArray();
+            if (sections.length == 0) return;
+
+            // Flatten the first section into a short[4096] for compression.
+            // Uses the section's block state container.
+            short[] sectionData = new short[4096];
+            int idx = 0;
+            for (int y = 0; y < 16; y++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int x = 0; x < 16; x++) {
+                        var state = sections[0].getBlockState(x, y, z);
+                        sectionData[idx++] = (short) Block.getRawIdFromState(state);
+                    }
+                }
+            }
+
+            byte[] compressed = ChunkDataCompressor.compress(sectionData);
+            long handle = OffHeapCache.store(compressed);
+            if (handle != -1) {
+                offHeapHandles.put(key, handle);
+            }
+        } catch (Throwable t) {
+            // Never let cache eviction crash the game.
+            OsmiumConstants.LOGGER.debug("Osmium: onEvict failed for chunk {}", key, t);
         }
     }
 
