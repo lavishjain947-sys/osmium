@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.4 — Mixin Hardening & GPU Cleanup
+
+### Fixed
+- **Mixin Hardening**: Promoted `require = 1` across `MinecraftClientMixin`, `GameRendererMixin`, and `EntityRenderDispatcherMixin` to prevent silent mixin failures on mapping changes.
+- **GPU Resource Leak**: Added `HierarchicalZCuller.destroy()` to cleanly deallocate OpenGL FBO, depth texture, PBO, and sync fences.
+- **Client Lifecycle Cleanup**: Registered Fabric `ClientLifecycleEvents.CLIENT_STOPPING` in `OsmiumClient` invoking `HierarchicalZCuller.destroy()`, `OffHeapCache.shutdown()`, and `MemoryOrchestrator.shutdown()`.
+- **Core Shutdown Handlers**: Implemented `OffHeapCache.shutdown()` (closing FFM Arena, zeroing slab, clearing tracking structures) and `MemoryOrchestrator.shutdown()`.
+
 ## 1.0.3 — Real Chunk Eviction & Pipeline Hardening
 
 ### Added

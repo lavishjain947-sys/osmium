@@ -16,6 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
 
+    private static boolean osmium$lastStateValid = true;
+
     @Inject(method = "renderWorld", at = @At("HEAD"), require = 1)
     private void osmium$beforeWorldRender(RenderTickCounter tickCounter,
             CallbackInfo ci) {
@@ -45,11 +47,5 @@ public class GameRendererMixin {
             RenderSystem.viewport(0, 0,
                     window.getFramebufferWidth(), window.getFramebufferHeight());
         }
-    }
-
-    @Inject(method = "render", at = @At("TAIL"), require = 1)
-    private void osmium$onRenderEnd(RenderTickCounter tickCounter, boolean tick, CallbackInfo ci) {
-        // Invalidate culler depth mirror on dimension or resource change.
-        HierarchicalZCuller.invalidate();
     }
 }

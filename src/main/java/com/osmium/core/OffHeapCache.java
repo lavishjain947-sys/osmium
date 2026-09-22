@@ -239,6 +239,25 @@ public final class OffHeapCache {
         return totalEvictions.get();
     }
 
+    public static void shutdown() {
+        synchronized (ALLOC_LOCK) {
+            try {
+                if (arena != null) {
+                    arena.close();
+                    arena = null;
+                }
+            } catch (Throwable t) {
+                OsmiumConstants.LOGGER.warn("[Osmium] Error closing off-heap arena during shutdown", t);
+            }
+            slab = null;
+            freeList.clear();
+            lruIndex.clear();
+            fallbackMap.clear();
+            usedMemory.set(0);
+            bumpPointer = 0;
+        }
+    }
+
     public static boolean isFallbackMode() {
         return FALLBACK_MODE;
     }

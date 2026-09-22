@@ -1,5 +1,18 @@
 # Osmium — Patch Notes
 
+## v1.0.4 Patch Notes
+
+### Mixin Hardening & Resource Cleanup
+1. **`src/main/java/com/osmium/mixin/client/MinecraftClientMixin.java`**: Promoted all `@Inject` annotations to `require = 1`.
+2. **`src/main/java/com/osmium/mixin/client/GameRendererMixin.java`**: Promoted `renderWorld` HEAD and RETURN injections to `require = 1` and removed per-frame invalidation.
+3. **`src/main/java/com/osmium/mixin/client/EntityRenderDispatcherMixin.java`**: Promoted `render` injection to `require = 1`.
+4. **`src/main/java/com/osmium/render/HierarchicalZCuller.java`**: Added `destroy()` method to free FBO, depth texture, PBO, and sync fence.
+5. **`src/main/java/com/osmium/core/OffHeapCache.java`**: Added `shutdown()` to cleanly close the FFM Arena, zero the slab, and clear structures.
+6. **`src/main/java/com/osmium/core/MemoryOrchestrator.java`**: Added `shutdown()` to interrupt daemon thread and stop memory monitoring.
+7. **`src/main/java/com/osmium/OsmiumClient.java`**: Registered `ClientLifecycleEvents.CLIENT_STOPPING` to invoke GPU and memory cleanup handlers on client shutdown.
+
+---
+
 ## v1.0.3 Patch Notes
 
 ### Enhancements & Hardening

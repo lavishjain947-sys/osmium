@@ -52,6 +52,10 @@ public final class MemoryOrchestrator implements Runnable {
         }
     }
 
+    public static synchronized void shutdown() {
+        stop();
+    }
+
     @Override
     public void run() {
         while (running) {
