@@ -1,8 +1,25 @@
-# Osmium v1.0.1 — Patch Notes
+# Osmium — Patch Notes
 
-This patch addresses 15 critical, high, and medium severity issues across rendering, mixins, memory pooling, and modularity.
+## v1.0.2 Patch Notes
 
-## Files Modified & Summary of Changes
+### Critical
+- Fixed ClientChunkManagerMixin signature. This unblocks the entire
+  chunk caching + off-heap compression pipeline.
+
+### Verified
+- ChunkDataCompressor.decompress raw tag handling
+- FastMath negative angle wrap
+- SimdMath scalar fallback
+
+### Changed
+- ModMenu integration split into two classes (safe loading)
+- Removed AABBPool and Vec3Pool (immutability issue in 1.21.11)
+
+---
+
+## v1.0.1 Patch Notes
+
+### Files Modified & Summary of Changes
 
 1. **`src/main/java/com/osmium/mixin/client/ClientChunkManagerMixin.java`**: Corrected packet chunk load method parameters and error handling for 1.21.11 Yarn mappings.
 2. **`src/main/java/com/osmium/mixin/client/EntityRenderDispatcherMixin.java`**: Multiplied projection matrix by model-view matrix for accurate world-to-screen occlusion testing.

@@ -8,10 +8,8 @@ import com.osmium.chunk.ChunkDataCompressor;
 import com.osmium.core.FrameBudgetController;
 import com.osmium.core.MemoryOrchestrator;
 import com.osmium.core.OffHeapCache;
-import com.osmium.pool.AABBPool;
 import com.osmium.pool.BlockPosPool;
 import com.osmium.pool.EnumValuesCache;
-import com.osmium.pool.Vec3Pool;
 import com.osmium.render.DynamicResolutionController;
 import com.osmium.util.MemoryMath;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -79,8 +77,8 @@ public final class OsmiumCommand {
                 FrameBudgetController.getP95Ms(),
                 FrameBudgetController.getP99Ms()));
 
-        long totalHits = BlockPosPool.hits() + AABBPool.hits() + Vec3Pool.hits();
-        long totalMisses = BlockPosPool.misses() + AABBPool.misses() + Vec3Pool.misses();
+        long totalHits = BlockPosPool.hits();
+        long totalMisses = BlockPosPool.misses();
         long total = totalHits + totalMisses;
         double hitRatio = total > 0 ? ((double) totalHits / total) * 100.0 : 0.0;
 
@@ -126,10 +124,6 @@ public final class OsmiumCommand {
         source.sendFeedback(Text.translatable("osmium.command.pools.header"));
         source.sendFeedback(Text.translatable("osmium.command.pools.blockpos",
                 BlockPosPool.size(), BlockPosPool.hits(), BlockPosPool.misses()));
-        source.sendFeedback(Text.translatable("osmium.command.pools.aabb",
-                AABBPool.size(), AABBPool.hits(), AABBPool.misses()));
-        source.sendFeedback(Text.translatable("osmium.command.pools.vec3",
-                Vec3Pool.size(), Vec3Pool.hits(), Vec3Pool.misses()));
         source.sendFeedback(Text.translatable("osmium.command.pools.enums",
                 EnumValuesCache.cachedClassesCount()));
         return 1;

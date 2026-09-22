@@ -2,7 +2,6 @@ package com.osmium.mixin.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.osmium.OsmiumConfig;
-import com.osmium.pool.AABBPool;
 import com.osmium.render.HierarchicalZCuller;
 import com.osmium.render.ShaderAwareCuller;
 import net.minecraft.block.entity.BlockEntity;
@@ -31,12 +30,12 @@ public class BlockEntityRenderDispatcherMixin {
         }
 
         OsmiumConfig config = OsmiumConfig.get();
-        if (config.enabled && config.hierarchicalZCullingEnabled) {
+        if (config != null && config.enabled && config.hierarchicalZCullingEnabled) {
             try {
                 MinecraftClient client = MinecraftClient.getInstance();
                 if (client != null && client.getWindow() != null) {
                     BlockPos pos = blockEntity.getPos();
-                    Box box = AABBPool.acquire(pos);
+                    Box box = new Box(pos);
                     int w = client.getWindow().getFramebufferWidth();
                     int h = client.getWindow().getFramebufferHeight();
                     if (HierarchicalZCuller.isOccluded(box, RenderSystem.getProjectionMatrix(), w, h)) {

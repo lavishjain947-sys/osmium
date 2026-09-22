@@ -5,6 +5,7 @@ import com.osmium.core.FrameBudgetController;
 import com.osmium.core.MemoryOrchestrator;
 import com.osmium.core.OffHeapCache;
 import com.osmium.core.PredictionEngine;
+import com.osmium.integration.ModMenuIntegration;
 import com.osmium.integration.SodiumIntegration;
 import com.osmium.util.JvmTuner;
 import net.fabricmc.api.ClientModInitializer;
@@ -29,6 +30,9 @@ public class OsmiumClient implements ClientModInitializer {
         JvmTuner.logRecommendations();
 
         SodiumIntegration.onInit();
-        // Iris integration and ModMenu entrypoint are handled via dedicated entrypoints / inert stubs in v1.0.1
+
+        if (ModMenuIntegration.isLoaded()) {
+            OsmiumConstants.LOGGER.info("ModMenu detected.");
+        }
     }
 }

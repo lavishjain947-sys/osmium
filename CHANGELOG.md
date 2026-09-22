@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.2 — Patch Release
+
+### Fixed
+- ClientChunkManagerMixin: correct method signature for 1.21.11 Yarn
+  mappings (BiomeArray + BitSet parameters, WorldChunk return type).
+  Requires = 1 now enforces signature validation at build time.
+- ChunkDataCompressor: verified raw tag handling in decompress().
+- FastMath: verified negative angle wrap for sin/cos.
+- SimdMath: verified scalar fallback implementations.
+- ModMenuIntegration: separated ModMenuApi into its own class to prevent
+  NoClassDefFoundError when ModMenu is absent.
+- Removed AABBPool and Vec3Pool (immutable objects cannot be pooled
+  effectively in 1.21.11). BlockPosPool retained (BlockPos.Mutable is safe).
+
+### Changed
+- Chunk LRU caching and off-heap compression now active (were silently
+  disabled due to the mixin signature issue).
+
 ## 1.0.1 — Critical Bug Fix Patch
 - **ClientChunkManagerMixin**: Fixed packet chunk load method signature and parameters for 1.21.11.
 - **EntityRenderDispatcherMixin**: Combined projection matrix with model-view camera matrix for accurate occlusion culling.
@@ -10,7 +28,7 @@ All notable changes to this project will be documented in this file.
 - **OsmiumConfig**: Added thread-safe double-checked locking static `get()` singleton accessor.
 - **EnumValuesCache**: Migrated reflection to Java 21 `MethodHandles.Lookup` and `VarHandle` with fallback.
 - **ChunkDataCompressor**: Fixed raw tag handling and buffer wrapping logic in `decompress()`.
-- **MinecraftClientMixin**: Hooked `PredictiveChunkLoader` into `tick` at `TAIL` for per-tick motion vector calculation.
+- **MinecraftClientMixin**: Hooked `PredictiveChunkLoader` into `tick` at `TAIL` for per-tick motion calculation.
 - **IrisPipelineMixin & ShaderAwareCuller**: Safely stubbed out Iris mixin and pipeline hooks for v1.0.1 stability.
 - **ObjectPool**: Replaced `shrinkAll` with a thread-safe implementation using `ConcurrentLinkedQueue.poll()`.
 - **FastMath**: Fixed trigonometry table indexing to wrap negative angles correctly.
