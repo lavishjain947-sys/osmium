@@ -9,7 +9,8 @@
     "client.ChunkBuilderMixin",
     "client.ClientChunkManagerMixin",
     "client.EntityRenderDispatcherMixin",
-    "client.BlockEntityRenderDispatcherMixin"
+    "client.BlockEntityRenderDispatcherMixin",
+    "iris.IrisPipelineMixin"
   ],
   "injectors": {
     "defaultRequire": 1

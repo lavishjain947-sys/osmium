@@ -31,6 +31,7 @@ public class OsmiumClient implements ClientModInitializer {
         JvmTuner.logRecommendations();
 
         SodiumIntegration.onInit();
+        com.osmium.integration.IrisIntegration.onInit();
 
         if (ModMenuIntegration.isLoaded()) {
             OsmiumConstants.LOGGER.info("ModMenu detected.");
