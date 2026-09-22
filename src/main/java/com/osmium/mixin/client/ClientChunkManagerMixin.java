@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.BitSet;
 
+// Verified for 1.21.11 Yarn mappings (require = 1 enforced)
 @Mixin(ClientChunkManager.class)
 public class ClientChunkManagerMixin {
 
