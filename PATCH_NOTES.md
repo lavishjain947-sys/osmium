@@ -1,5 +1,17 @@
 # Osmium — Patch Notes
 
+## v1.0.3 Patch Notes
+
+### Enhancements & Hardening
+- **ChunkLRUCache.onEvict**: Extracted real block data from the chunk's first section using `chunk.getSectionArray()`, `section.getBlockState(x, y, z)`, and `Block.getRawIdFromState(state)` into `short[4096]` before Zstd compression and off-heap storage.
+- **MinecraftClientMixin**: Promoted `render` and `tick` injections to `require = 1` for strict mixin validation.
+- **GameRendererMixin**: Promoted `renderWorld` injections to `require = 1`.
+- **EntityRenderDispatcherMixin**: Promoted `render` injection to `require = 1`.
+- **HierarchicalZCuller**: Added `destroy()` method to release FBO, depth texture, PBO, and GL sync fence cleanly.
+- **OsmiumClient**: Added explicit `ShaderAwareCuller.init()` initialization call.
+
+---
+
 ## v1.0.2 Patch Notes
 
 ### Critical

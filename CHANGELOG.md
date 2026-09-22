@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.3 — Real Chunk Eviction & Pipeline Hardening
+
+### Added
+- **Real Chunk Data Eviction**: `ChunkLRUCache.onEvict()` extracts real block state IDs from `WorldChunk` chunk sections into `short[4096]` volumes for compression and off-heap caching.
+- **HierarchicalZCuller Lifecycle**: Added `destroy()` method to cleanly deallocate OpenGL FBO, depth texture, PBO, and sync fences.
+- **ShaderAwareCuller Initialization**: Added explicit `init()` call in `OsmiumClient`.
+
+### Hardened
+- Promoted mixin injections in `MinecraftClientMixin`, `GameRendererMixin`, and `EntityRenderDispatcherMixin` to `require = 1` for strict compile/load validation.
+
 ## 1.0.2 — Patch Release
 
 ### Fixed

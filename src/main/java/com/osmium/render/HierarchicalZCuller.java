@@ -174,4 +174,24 @@ public final class HierarchicalZCuller {
     public static void invalidate() {
         mirrorValid = false;
     }
+
+    public static void destroy() {
+        if (mirrorFbo != -1) {
+            GL30.glDeleteFramebuffers(mirrorFbo);
+            mirrorFbo = -1;
+        }
+        if (mirrorDepthTex != -1) {
+            GL11.glDeleteTextures(mirrorDepthTex);
+            mirrorDepthTex = -1;
+        }
+        if (pbo != -1) {
+            GL15.glDeleteBuffers(pbo);
+            pbo = -1;
+        }
+        if (fence != 0L) {
+            GL32.glDeleteSync(fence);
+            fence = 0L;
+        }
+        mirrorValid = false;
+    }
 }

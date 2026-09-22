@@ -7,6 +7,7 @@ import com.osmium.core.OffHeapCache;
 import com.osmium.core.PredictionEngine;
 import com.osmium.integration.ModMenuIntegration;
 import com.osmium.integration.SodiumIntegration;
+import com.osmium.render.ShaderAwareCuller;
 import com.osmium.util.JvmTuner;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -30,6 +31,7 @@ public class OsmiumClient implements ClientModInitializer {
         JvmTuner.logRecommendations();
 
         SodiumIntegration.onInit();
+        ShaderAwareCuller.init();
 
         if (ModMenuIntegration.isLoaded()) {
             OsmiumConstants.LOGGER.info("ModMenu detected.");

@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
 
-    @Inject(method = "renderWorld", at = @At("HEAD"), require = 0)
+    @Inject(method = "renderWorld", at = @At("HEAD"), require = 1)
     private void osmium$beforeWorldRender(RenderTickCounter tickCounter,
             CallbackInfo ci) {
         OsmiumConfig cfg = OsmiumConfig.get();
@@ -37,7 +37,7 @@ public class GameRendererMixin {
         }
     }
 
-    @Inject(method = "renderWorld", at = @At("RETURN"), require = 0)
+    @Inject(method = "renderWorld", at = @At("RETURN"), require = 1)
     private void osmium$afterWorldRender(RenderTickCounter tickCounter,
             CallbackInfo ci) {
         Window window = MinecraftClient.getInstance().getWindow();
@@ -47,7 +47,7 @@ public class GameRendererMixin {
         }
     }
 
-    @Inject(method = "render", at = @At("TAIL"), require = 0)
+    @Inject(method = "render", at = @At("TAIL"), require = 1)
     private void osmium$onRenderEnd(RenderTickCounter tickCounter, boolean tick, CallbackInfo ci) {
         // Invalidate culler depth mirror on dimension or resource change.
         HierarchicalZCuller.invalidate();
